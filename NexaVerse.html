@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>NexaVerse | Secure Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.3s ease, color 0.2s ease;
+      overflow-x: hidden;
+    }
+
+    /* Light Mode (default) */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --accent: #6d28d9;
+      --accent-glow: rgba(109, 40, 217, 0.4);
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --hero-gradient-start: #eef2ff;
+      --hero-gradient-end: #e0e7ff;
+      --navbar-bg: rgba(255, 255, 255, 0.8);
+      --stat-bg: #f1f5f9;
+    }
+
+    body.dark {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --accent: #a78bfa;
+      --accent-glow: rgba(167, 139, 250, 0.5);
+      --card-bg: #1e293b;
+      --border: #334155;
+      --hero-gradient-start: #0f172a;
+      --hero-gradient-end: #1e1b2f;
+      --navbar-bg: rgba(15, 23, 42, 0.9);
+      --stat-bg: #1e293b;
+    }
+
+    /* LOGIN SCREEN */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    }
+    .login-card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 48px;
+      width: 400px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+    .login-card h2 {
+      color: #6d28d9;
+      margin-bottom: 0.5rem;
+    }
+    .login-card input {
+      width: 100%;
+      padding: 14px 18px;
+      margin: 12px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.2s;
+    }
+    .login-card input:focus {
+      border-color: #6d28d9;
+    }
+    .login-btn {
+      background: linear-gradient(95deg, #6d28d9, #a78bfa);
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 60px;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .error-msg {
+      color: #dc2626;
+      margin-top: 12px;
+      font-size: 0.85rem;
+    }
+    .logo-small {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* MAIN SITE (hidden by default) */
+    .main-site {
+      display: none;
+    }
+
+    /* Rest of the original styles */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      background: var(--navbar-bg);
+      z-index: 1000;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), #c084fc);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .theme-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-primary);
+      transition: 0.2s;
+    }
+
+    .logout-nav {
+      background: #ef4444;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 500;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
+      overflow: hidden;
+      padding-top: 80px;
+    }
+
+    .hero-content {
+      text-align: center;
+      z-index: 2;
+      max-width: 900px;
+      padding: 2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      font-weight: 800;
+      background: linear-gradient(145deg, var(--text-primary), var(--accent));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.9s ease;
+    }
+
+    .hero p {
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      animation: fadeUp 1s ease;
+    }
+
+    .cta-button {
+      background: var(--accent);
+      color: white;
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 8px 20px var(--accent-glow);
+    }
+
+    .cta-button:hover {
+      transform: scale(1.05);
+      background: #7c3aed;
+    }
+
+    #canvas-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .features {
+      padding: 5rem 2rem;
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      background: linear-gradient(120deg, var(--accent), #a5b4fc);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 2rem;
+      text-align: center;
+      transition: 0.25s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 30px -15px rgba(0,0,0,0.2);
+      border-color: var(--accent);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .dashboard-section {
+      background: var(--bg-secondary);
+      padding: 4rem 2rem;
+      border-radius: 60px;
+      margin: 3rem auto;
+      max-width: 1300px;
+    }
+
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .stat-card {
+      background: var(--stat-bg);
+      border-radius: 32px;
+      padding: 1.8rem;
+      text-align: center;
+      min-width: 180px;
+      flex: 1;
+      border: 1px solid var(--border);
+    }
+
+    .stat-number {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .lang-selector {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .lang-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 3rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginScreen" class="login-container">
+  <div class="login-card">
+    <div class="logo-small">✦ NexaVerse</div>
+    <h2>Welcome Back</h2>
+    <p style="color: #6b7280; margin-bottom: 1.5rem;">Login to explore the digital horizon</p>
+    <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button class="login-btn" id="doLoginBtn"><i class="fas fa-key"></i> Login</button>
+    <div id="loginErrorMsg" class="error-msg"></div>
+  </div>
+</div>
+
+<!-- MAIN WEBSITE -->
+<div id="mainSite" class="main-site">
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">✦ NexaVerse</div>
+      <div class="nav-links">
+        <a id="navHome">Home</a>
+        <a id="navFeatures">Features</a>
+        <a id="navDashboard">Dashboard</a>
+        <a id="navLanguages">Languages</a>
+        <button class="theme-toggle" id="darkModeToggle"><i class="fas fa-moon"></i> Dark/Light</button>
+        <button class="logout-nav" id="logoutBtnMain"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <canvas id="canvas-bg"></canvas>
+    <div class="hero-content" data-aos="fade-up">
+      <div style="margin-bottom: 1rem; font-size: 1rem; background: rgba(109,40,217,0.2); display: inline-block; padding: 0.3rem 1rem; border-radius: 40px;">
+        <i class="fas fa-user-check"></i> Welcome, <strong id="welcomeUser">User</strong>
+      </div>
+      <h1>Beyond the Digital Horizon</h1>
+      <p>AI-powered experience • Real-time data • 50+ languages</p>
+      <button class="cta-button" id="exploreBtn">Explore NexaVerse <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </section>
+
+  <div id="featuresSection">
+    <div class="features" data-aos="fade-up">
+      <h2 class="section-title">🌟 Revolutionary Features</h2>
+      <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-robot"></i></div><h3>AI-Powered UX</h3><p>Adaptive interface learns your habits.</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-cube"></i></div><h3>3D Animated Hero</h3><p>Immersive WebGL experience.</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h3>Real-time Dashboard</h3><p>Live metrics & analytics.</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-language"></i></div><h3>50+ Languages</h3><p>Global ready, instant translation.</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-adjust"></i></div><h3>Dark/Light Mode</h3><p>Seamless toggle with eye comfort.</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-bolt"></i></div><h3>99.9% Uptime</h3><p>Lightning fast & rock-solid.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="dashboardSection" class="dashboard-section" data-aos="zoom-in">
+    <h2 class="section-title">📊 Real-Time Data Dashboard</h2>
+    <div class="stats-container" id="liveStats">
+      <div class="stat-card"><div class="stat-number" id="activeUsers">1,284</div><p>Active Users</p><i class="fas fa-user-friends"></i></div>
+      <div class="stat-card"><div class="stat-number" id="apiCalls">8.4K</div><p>API Requests/sec</p><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="stat-card"><div class="stat-number" id="responseTime">42</div><p>ms Response</p><i class="fas fa-tachometer-alt"></i></div>
+      <div class="stat-card"><div class="stat-number" id="aiPredict">97%</div><p>AI Accuracy</p><i class="fas fa-brain"></i></div>
+    </div>
+    <p style="text-align:center; margin-top:1.5rem; opacity:0.7;"><i class="fas fa-sync-alt"></i> Live updates every 3 seconds</p>
+  </section>
+
+  <div id="langSection" style="max-width:1300px; margin:2rem auto; padding: 0 2rem;">
+    <h2 class="section-title">🗣️ Multi-Language Experience (50+ languages)</h2>
+    <div class="lang-selector" id="languageSelector"></div>
+    <div class="feature-card" style="text-align: center; background: var(--stat-bg);" id="translationDemo">
+      <h3 id="welcomeMsg">Welcome to NexaVerse</h3>
+      <p id="demoText">Experience the future of digital innovation with AI-powered tools, real-time insights and global reach.</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 NexaVerse — Beyond the Digital Horizon • 99.9% Uptime Guarantee • <i class="fas fa-shield-alt"></i> AI Security</p>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  // ==================== CREDENTIALS ====================
+  const VALID_USERNAME = "qasimktk";
+  const VALID_PASSWORD = "khattak1";
+
+  // DOM Elements
+  const loginScreen = document.getElementById('loginScreen');
+  const mainSite = document.getElementById('mainSite');
+  const loginBtn = document.getElementById('doLoginBtn');
+  const loginError = document.getElementById('loginErrorMsg');
+  const usernameInput = document.getElementById('loginUsername');
+  const passwordInput = document.getElementById('loginPassword');
+  const logoutMain = document.getElementById('logoutBtnMain');
+  const welcomeSpan = document.getElementById('welcomeUser');
+
+  // Login Function
+  function performLogin() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+      loginScreen.style.display = 'none';
+      mainSite.style.display = 'block';
+      welcomeSpan.innerText = username;
+      initializeAllFeatures();
+    } else {
+      loginError.innerText = "❌ Invalid credentials! Use: qasimktk / khattak1";
+    }
+  }
+
+  loginBtn.addEventListener('click', performLogin);
+  usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performLogin(); });
+  passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performLogin(); });
+
+  // Logout
+  logoutMain.addEventListener('click', () => {
+    mainSite.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    usernameInput.value = '';
+    passwordInput.value = '';
+    loginError.innerText = '';
+  });
+
+  // Navigation
+  document.getElementById('navHome')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.getElementById('navFeatures')?.addEventListener('click', () => document.getElementById('featuresSection')?.scrollIntoView({ behavior: 'smooth' }));
+  document.getElementById('navDashboard')?.addEventListener('click', () => document.getElementById('dashboardSection')?.scrollIntoView({ behavior: 'smooth' }));
+  document.getElementById('navLanguages')?.addEventListener('click', () => document.getElementById('langSection')?.scrollIntoView({ behavior: 'smooth' }));
+
+  function initializeAllFeatures() {
+    AOS.init({ duration: 800, once: true });
+
+    // 3D Canvas Particles
+    const canvas = document.getElementById('canvas-bg');
+    let ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    const PARTICLE_COUNT = 180;
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 3 + 1,
+          speedX: (Math.random() - 0.5) * 0.6,
+          speedY: (Math.random() - 0.5) * 0.4,
+          alpha: Math.random() * 0.5 + 0.2,
+          color: `hsl(${Math.random() * 60 + 260}, 70%, 60%)`
+        });
+      }
+    }
+
+    function drawParticles() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+      for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha * 0.7;
+        ctx.fill();
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+      }
+      requestAnimationFrame(drawParticles);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initParticles();
+    });
+    resizeCanvas();
+    initParticles();
+    drawParticles();
+
+    // Dark/Light Mode
+    const toggleBtn = document.getElementById('darkModeToggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('nexaTheme', isDark ? 'dark' : 'light');
+    });
+    if (localStorage.getItem('nexaTheme') === 'dark') {
+      document.body.classList.add('dark');
+    }
+
+    // Real-time Dashboard
+    function updateDashboard() {
+      const activeUsersElem = document.getElementById('activeUsers');
+      const apiCallsElem = document.getElementById('apiCalls');
+      const responseTimeElem = document.getElementById('responseTime');
+      const aiPredictElem = document.getElementById('aiPredict');
+
+      let currentUsers = parseInt(activeUsersElem.innerText.replace(/,/g, '')) || 1284;
+      let newUsers = currentUsers + Math.floor(Math.random() * 35) - 10;
+      newUsers = Math.max(890, newUsers);
+      activeUsersElem.innerText = newUsers.toLocaleString();
+
+      let apiVal = parseFloat(apiCallsElem.innerText) || 8.4;
+      let newApi = (apiVal + (Math.random() * 0.8 - 0.3)).toFixed(1);
+      if (newApi < 4.5) newApi = 5.2;
+      apiCallsElem.innerText = newApi + 'K';
+
+      let respVal = parseInt(responseTimeElem.innerText) || 42;
+      let newResp = respVal + Math.floor(Math.random() * 8) - 3;
+      newResp = Math.min(85, Math.max(28, newResp));
+      responseTimeElem.innerText = newResp;
+
+      let aiAcc = parseInt(aiPredictElem.innerText) || 97;
+      let newAi = aiAcc + (Math.random() * 1.2 - 0.5);
+      newAi = Math.min(99.5, Math.max(94.2, newAi));
+      aiPredictElem.innerText = newAi.toFixed(1) + '%';
+    }
+    setInterval(updateDashboard, 3000);
+
+    // Multi-language Support
+    const languagesDB = {
+      en: { welcome: "Welcome to NexaVerse", desc: "Experience the future of digital innovation with AI-powered tools, real-time insights and global reach." },
+      es: { welcome: "Bienvenido a NexaVerse", desc: "Experimenta el futuro de la innovación digital con herramientas impulsadas por IA." },
+      fr: { welcome: "Bienvenue à NexaVerse", desc: "Découvrez l'avenir de l'innovation numérique avec des outils basés sur l'IA." },
+      de: { welcome: "Willkommen bei NexaVerse", desc: "Erleben Sie die Zukunft der digitalen Innovation mit KI-gestützten Tools." },
+      hi: { welcome: "नेक्सावर्स में आपका स्वागत है", desc: "एआई-संचालित टूल के साथ डिजिटल नवाचार के भविष्य का अनुभव करें।" }
+    };
+    
+    const langSelectorDiv = document.getElementById('languageSelector');
+    const sampleLangs = ['en', 'es', 'fr', 'de', 'hi'];
+    sampleLangs.forEach(lang => {
+      const btn = document.createElement('button');
+      btn.classList.add('lang-btn');
+      btn.innerText = lang.toUpperCase();
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const translation = languagesDB[lang];
+        if (translation) {
+          document.getElementById('welcomeMsg').innerHTML = translation.welcome;
+          document.getElementById('demoText').innerHTML = translation.desc;
+        }
+      });
+      langSelectorDiv.appendChild(btn);
+    });
+    if (langSelectorDiv.children[0]) langSelectorDiv.children[0].classList.add('active');
+
+    document.getElementById('exploreBtn').addEventListener('click', () => {
+      alert("🚀 NexaVerse: AI-powered universe ready! 🌌 Real-time data, 3D immersion, Dark mode & 50+ languages active.");
+    });
+  }
+</script>
+</body>
+</html>
